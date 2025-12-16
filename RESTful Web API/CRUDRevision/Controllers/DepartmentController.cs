@@ -1,7 +1,13 @@
-﻿using CRUDRevision.Models;
+﻿using ClosedXML.Excel;
+using CRUDRevision.Models;
+using DocumentFormat.OpenXml.Office2010.PowerPoint;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.Text;
+using System.Xml.Linq;
 
 namespace CRUDRevision.Controllers
 {
@@ -112,5 +118,53 @@ namespace CRUDRevision.Controllers
 
             return RedirectToAction("Index");
         }
+        #region Export
+        [HttpGet]
+        public FileResult ExportToExcel()
+        {
+            // Step 1: Fetch data same as DepartmentList
+            string ConnectionString = _config.GetConnectionString("ConnectionString");
+            using SqlConnection sqlConnection = new SqlConnection(ConnectionString);
+            sqlConnection.Open();
+
+            SqlCommand command = sqlConnection.CreateCommand();
+            command.CommandType = CommandType.StoredProcedure;
+            command.CommandText = "PR_Department_SelectAll";
+            using SqlDataReader reader = command.ExecuteReader();
+
+            DataTable table = new DataTable();
+            table.Load(reader);
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Departments");
+
+            // Insert DataTable as an Excel table (structured table)
+            var xlTable = worksheet.Cell(1, 1).InsertTable(table, "DepartmentsTable", true);
+            // Apply built-in Excel Table Style (Ice Blue - Medium 23)
+            xlTable.Theme = XLTableTheme.TableStyleMedium23;
+
+            // Autofit columns
+            worksheet.Columns().AdjustToContents();
+
+            // Apply borders and styling
+            var rngTable = worksheet.RangeUsed();
+            rngTable.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            rngTable.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+            // Header styling
+            var headerRow = rngTable.Row(1);
+            headerRow.Style.Font.Bold = true;
+            headerRow.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            var content = stream.ToArray();
+
+            return File(content,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        "Departments.xlsx");
+        }
+
+        #endregion
+
     }
 }

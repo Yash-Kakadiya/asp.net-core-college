@@ -1,4 +1,5 @@
-﻿using CRUDRevision.Models;
+﻿using ClosedXML.Excel;
+using CRUDRevision.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.SqlClient;
@@ -15,22 +16,85 @@ namespace CRUDRevision.Controllers
             _config = config;
         }
 
-        // ---------- Load Department Dropdown ----------
-        private void LoadDepartmentDropdown()
+        // ------------------ SELECT ALL -------------------
+        public IActionResult Index(
+            string EmpName = "",
+            decimal? MinSalary = null,
+            decimal? MaxSalary = null,
+            int DeptID = 0,
+            DateTime? JoiningDateFrom = null,
+            DateTime? JoiningDateTo = null,
+            string City = "")
         {
-            List<DepartmentDropDownModel> list = new List<DepartmentDropDownModel>();
+            // Load dropdown list for Department
+            LoadDepartmentDropdown(DeptID);
 
-            string con = _config.GetConnectionString("ConnectionString");
+            DataTable dt = new DataTable();
 
-            using (SqlConnection sql = new SqlConnection(con))
+            try
+            {
+                string connStr = _config.GetConnectionString("ConnectionString");
+
+                using (SqlConnection conn = new SqlConnection(connStr))
+                {
+                    conn.Open();
+
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.CommandText = "PR_Employee_Search";
+
+                        // Passing Search Values to Stored Procedure
+                        cmd.Parameters.Add("@EmpName", SqlDbType.VarChar).Value = EmpName ?? "";
+                        cmd.Parameters.Add("@MinSalary", SqlDbType.Decimal).Value = (object?)MinSalary ?? DBNull.Value;
+                        cmd.Parameters.Add("@MaxSalary", SqlDbType.Decimal).Value = (object?)MaxSalary ?? DBNull.Value;
+                        cmd.Parameters.Add("@DeptID", SqlDbType.Int).Value = DeptID;
+                        cmd.Parameters.Add("@JoiningDateFrom", SqlDbType.Date).Value = (object?)JoiningDateFrom ?? DBNull.Value;
+                        cmd.Parameters.Add("@JoiningDateTo", SqlDbType.Date).Value = (object?)JoiningDateTo ?? DBNull.Value;
+                        cmd.Parameters.Add("@City", SqlDbType.VarChar).Value = City ?? "";
+
+                        SqlDataAdapter da = new SqlDataAdapter(cmd);
+                        da.Fill(dt);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error loading employee list: " + ex.Message;
+            }
+
+            // Preserve search values
+            ViewBag.EmpName = EmpName;
+            ViewBag.MinSalary = MinSalary;
+            ViewBag.MaxSalary = MaxSalary;
+            ViewBag.SelectedDeptID = DeptID;
+            ViewBag.JoiningDateFrom = JoiningDateFrom;
+            ViewBag.JoiningDateTo = JoiningDateTo;
+            ViewBag.City = City;
+
+            return View(dt);
+        }
+
+        // Method to load Department dropdown list
+        private void LoadDepartmentDropdown(int selectedDeptID = 0)
+        {
+            List<DepartmentDropDownModel> deptList = new List<DepartmentDropDownModel>();
+
+            string conn = _config.GetConnectionString("ConnectionString");
+
+            using (SqlConnection sql = new SqlConnection(conn))
             {
                 sql.Open();
-                using (SqlCommand cmd = new SqlCommand("PR_Department_SelectAll", sql))
+                using (SqlCommand cmd = sql.CreateCommand())
                 {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "PR_Department_SelectAll";
+
                     SqlDataReader dr = cmd.ExecuteReader();
+
                     while (dr.Read())
                     {
-                        list.Add(new DepartmentDropDownModel()
+                        deptList.Add(new DepartmentDropDownModel
                         {
                             DeptID = Convert.ToInt32(dr["DeptID"]),
                             DepartmentName = dr["DepartmentName"].ToString()
@@ -39,26 +103,8 @@ namespace CRUDRevision.Controllers
                 }
             }
 
-            ViewBag.DeptList = list;
-        }
-
-        // ------------------ SELECT ALL -------------------
-        public IActionResult Index()
-        {
-            DataTable dt = new DataTable();
-            string con = _config.GetConnectionString("ConnectionString");
-
-            using (SqlConnection sql = new SqlConnection(con))
-            {
-                sql.Open();
-                using (SqlCommand cmd = new SqlCommand("PR_Employee_SelectAll", sql))
-                {
-                    SqlDataReader dr = cmd.ExecuteReader();
-                    dt.Load(dr);
-                }
-            }
-
-            return View(dt);
+            ViewBag.DeptList = deptList;
+            ViewBag.DeptID = selectedDeptID;
         }
 
         // ------------------ ADD EDIT -------------------
@@ -149,5 +195,52 @@ namespace CRUDRevision.Controllers
 
             return RedirectToAction("Index");
         }
+        #region Export
+        [HttpGet]
+        public FileResult ExportToExcel()
+        {
+            // Step 1: Fetch data same as DepartmentList
+            string ConnectionString = _config.GetConnectionString("ConnectionString");
+            using SqlConnection sqlConnection = new SqlConnection(ConnectionString);
+            sqlConnection.Open();
+
+            SqlCommand command = sqlConnection.CreateCommand();
+            command.CommandType = CommandType.StoredProcedure;
+            command.CommandText = "PR_Employee_SelectAll";
+            using SqlDataReader reader = command.ExecuteReader();
+
+            DataTable table = new DataTable();
+            table.Load(reader);
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Employees");
+
+            // Insert DataTable as an Excel table (structured table)
+            var xlTable = worksheet.Cell(1, 1).InsertTable(table, "EmployeesTable", true);
+            // Apply built-in Excel Table Style (Ice Blue - Medium 23)
+            xlTable.Theme = XLTableTheme.TableStyleMedium23;
+
+            // Autofit columns
+            worksheet.Columns().AdjustToContents();
+
+            // Apply borders and styling
+            var rngTable = worksheet.RangeUsed();
+            rngTable.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            rngTable.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+            // Header styling
+            var headerRow = rngTable.Row(1);
+            headerRow.Style.Font.Bold = true;
+            headerRow.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            var content = stream.ToArray();
+
+            return File(content,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        "Employees.xlsx");
+        }
+
+        #endregion
     }
 }

@@ -1,0 +1,151 @@
+﻿@model System.Data.DataTable
+
+<!-- DataTables + Bootstrap -->
+<link rel="stylesheet"
+      href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+
+<!-- Icons -->
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<!-- MAIN TABLE -->
+<div class="modern-table-wrapper mt-4">
+    <table class="table modern-table display w-100">
+        <thead>
+            <tr>
+                @foreach (System.Data.DataColumn col in Model.Columns)
+                {
+                    <th>@col.ColumnName</th>
+                }
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (System.Data.DataRow row in Model.Rows)
+            {
+                <tr class="modern-row">
+                    @foreach (var item in row.ItemArray)
+                    {
+                        <td>
+                            @* Auto-badge styling *@
+                            @if (item is string city &&
+                                                (city.Contains("Mumbai") || city.Contains("Delhi") || city.Contains("Surat")))
+                            {
+                                <span class="badge bg-primary p-2">@item</span>
+                            }
+                            else if (item is string dept && dept.ToLower().Contains("hr"))
+                            {
+                                <span class="badge bg-danger p-2">@item</span>
+                            }
+                            else
+                            {
+                                @item
+                            }
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('.modern-table').DataTable({
+            pageLength: 5,
+            responsive: true,
+            ordering: true,
+            searching: true,
+            lengthChange: false,
+            language: {
+                search: "",
+                searchPlaceholder: "🔍 Search here...",
+            }
+        });
+
+        // Row click highlight
+        $(".modern-table tbody").on("click", "tr", function () {
+            $(".modern-row").removeClass("row-selected");
+            $(this).addClass("row-selected");
+        });
+    });
+</script>
+
+<style>
+
+    /* --- WRAPPER DESIGN (Glassmorphism) --- */
+    .modern-table-wrapper {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(9px);
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    /* --- TABLE STYLE --- */
+    .modern-table {
+        border-radius: 12px !important;
+        overflow: hidden;
+        font-size: 15px;
+    }
+
+        .modern-table thead {
+            background: linear-gradient(90deg, #212529, #343a40) !important;
+            color: white;
+        }
+
+            .modern-table thead th {
+                padding: 14px !important;
+                letter-spacing: 0.6px;
+                font-size: 14px;
+            }
+
+        .modern-table tbody td {
+            padding: 14px !important;
+        }
+
+        /* --- ZEBRA EFFECT --- */
+        .modern-table tbody tr:nth-child(odd) {
+            background-color: #f8f9fa !important;
+        }
+
+        /* --- HOVER EFFECT --- */
+        .modern-table tbody tr:hover {
+            background-color: #e9ecef !important;
+            transform: scale(1.01);
+            transition: 0.2s ease;
+            cursor: pointer;
+        }
+
+    /* --- SELECTED ROW --- */
+    .row-selected {
+        background-color: #ffc107 !important;
+        color: black !important;
+    }
+
+    /* --- BADGES --- */
+    .badge {
+        font-size: 13px;
+        border-radius: 8px !important;
+    }
+
+    /* --- SEARCH INPUT --- */
+    .dataTables_filter input {
+        border-radius: 10px;
+        border: 2px solid #ced4da;
+        padding: 8px 14px;
+        margin-bottom: 8px;
+        width: 260px;
+        transition: .2s;
+    }
+
+        .dataTables_filter input:focus {
+            border-color: #6c63ff;
+            box-shadow: 0 0 6px rgba(108, 99, 255, 0.4);
+        }
+
+</style>

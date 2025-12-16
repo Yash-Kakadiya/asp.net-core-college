@@ -1,0 +1,177 @@
+﻿@model CRUDRevision.Models.Dashboard.DashboardModel
+@using System.Data
+
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<h2 class="text-center mt-3 mb-4 fw-bold">📊 Dashboard Analytics</h2>
+
+<div class="row text-center mb-4">
+
+    <div class="col-md-3">
+        <div class="card shadow p-3 bg-primary text-white rounded">
+            <h4><i class="fa fa-users"></i> Employees</h4>
+            <h2>@Model.TotalEmployees</h2>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow p-3 bg-success text-white rounded">
+            <h4><i class="fa fa-building"></i> Departments</h4>
+            <h2>@Model.TotalDepartments</h2>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow p-3 bg-warning text-white rounded">
+            <h4><i class="fa fa-user-plus"></i> Joined This Month</h4>
+            <h2>@Model.TotalThisMonth</h2>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow p-3 bg-danger text-white rounded">
+            <h4><i class="fa fa-ban"></i> Empty Departments</h4>
+            <h2>@Model.TotalEmptyDepartments</h2>
+        </div>
+    </div>
+
+</div>
+
+<hr />
+
+<!-- ===================== CHARTS ===================== -->
+
+<div class="row mt-4">
+
+    <div class="col-md-6 mb-4">
+        <h4 class="text-center">City-wise Employees</h4>
+        <canvas id="CityChart"></canvas>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <h4 class="text-center">Department Distribution</h4>
+        <canvas id="DeptChart"></canvas>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <h4 class="text-center">Avg Salary by Dept</h4>
+        <canvas id="SalaryChart"></canvas>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <h4 class="text-center">Last 6 Months Hiring</h4>
+        <canvas id="TrendChart"></canvas>
+    </div>
+
+</div>
+
+<hr />
+
+<!-- ===================== TABLES ===================== -->
+<h3 class="mt-5">City-wise Employees</h3>
+@Html.Partial("_DataTable", Model.CityWise)
+
+<h3 class="mt-5">Department-wise Employees</h3>
+@Html.Partial("_DataTable", Model.DepartmentWise)
+
+<h3 class="mt-5">Employees Joined This Month</h3>
+@Html.Partial("_DataTable", Model.EmployeesThisMonth)
+
+<h3 class="mt-5">Departments Without Employees</h3>
+@Html.Partial("_DataTable", Model.EmptyDepartments)
+
+<h3 class="mt-5">Salary By Department</h3>
+@Html.Partial("_DataTable", Model.SalaryByDepartment)
+
+<h3 class="mt-5">Joining Trend (6 Months)</h3>
+@Html.Partial("_DataTable", Model.JoiningTrendLast6Months)
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+    function CreateChart(canvasId, labels, values, type="bar") {
+        new Chart(document.getElementById(canvasId), {
+            type: type,
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "Data",
+                    data: values,
+                    borderWidth: 2
+                }]
+            }
+        });
+    }
+        // ----------------:: CITY CHART ::----------------
+    CreateChart("CityChart",
+        [
+            @foreach (DataRow r in Model.CityWise.Rows)
+            {
+                    @: '@r["City"]',
+            }
+        ],
+        [
+            @foreach (DataRow r in Model.CityWise.Rows)
+            {
+                    @: @r["TotalEmployees"],
+            }
+        ]
+    );
+
+    // ----------------:: DEPT CHART ::----------------
+    CreateChart("DeptChart",
+        [
+            @foreach (DataRow r in Model.DepartmentWise.Rows)
+            {
+                    @: '@r["DepartmentName"]',
+            }
+        ],
+        [
+            @foreach (DataRow r in Model.DepartmentWise.Rows)
+            {
+                    @: @r["TotalEmployees"],
+            }
+        ],
+        "pie"
+    );
+
+    // ----------------:: AVG SALARY ::----------------
+    CreateChart("SalaryChart",
+        [
+            @foreach (DataRow r in Model.SalaryByDepartment.Rows)
+            {
+                    @: '@r["DepartmentName"]',
+            }
+        ],
+        [
+            @foreach (DataRow r in Model.SalaryByDepartment.Rows)
+            {
+                    @: @r["AvgSalary"],
+            }
+        ],
+        "polarArea"
+    );
+
+    // ----------------:: TREND CHART ::----------------
+    CreateChart("TrendChart",
+        [
+            @foreach (DataRow r in Model.JoiningTrendLast6Months.Rows)
+            {
+                    @: '@r["MonthName"]',
+            }
+        ],
+        [
+            @foreach (DataRow r in Model.JoiningTrendLast6Months.Rows)
+            {
+                    @: @r["NewEmployees"],
+            }
+        ],
+        "line"
+    );
+
+
+</script>

@@ -50,7 +50,7 @@
         <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
             <div class="container-fluid">
 
-                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
+                <a class="navbar-brand fw-bold" asp-controller="Dashboard" asp-action="Index">
                     <i class="bi bi-speedometer2"></i> CRUDRevision
                 </a>
 
@@ -63,11 +63,11 @@
 
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
-                        <!-- Home -->
+                        <!-- Dashboard -->
                         <li class="nav-item">
-                            <a class="nav-link @(Context.Request.Path.Value.Contains("/Home") ? "active" : "")"
-                               asp-controller="Home" asp-action="Index">
-                                <i class="bi bi-house-door"></i> Home
+                            <a class="nav-link @(Context.Request.Path.Value.Contains("/Dashboard") ? "active" : "")"
+                               asp-controller="Dashboard" asp-action="Index">
+                                <i class="bi bi-house-door"></i> Dashboard
                             </a>
                         </li>
 

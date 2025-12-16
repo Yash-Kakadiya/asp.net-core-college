@@ -39,3 +39,12 @@ D:\01. Github\ASP.NET-Core\RESTful Web API\CRUDRevision\obj\Debug\net8.0\refint\
 D:\01. Github\ASP.NET-Core\RESTful Web API\CRUDRevision\obj\Debug\net8.0\CRUDRevision.pdb
 D:\01. Github\ASP.NET-Core\RESTful Web API\CRUDRevision\obj\Debug\net8.0\CRUDRevision.genruntimeconfig.cache
 D:\01. Github\ASP.NET-Core\RESTful Web API\CRUDRevision\obj\Debug\net8.0\ref\CRUDRevision.dll
+D:\01. Github\ASP.NET-Core\RESTful Web API\CRUDRevision\obj\Debug\net8.0\CRUDRevision.sourcelink.json
+D:\01. Github\ASP.NET-Core\RESTful Web API\CRUDRevision\bin\Debug\net8.0\ClosedXML.dll
+D:\01. Github\ASP.NET-Core\RESTful Web API\CRUDRevision\bin\Debug\net8.0\ClosedXML.Parser.dll
+D:\01. Github\ASP.NET-Core\RESTful Web API\CRUDRevision\bin\Debug\net8.0\DocumentFormat.OpenXml.dll
+D:\01. Github\ASP.NET-Core\RESTful Web API\CRUDRevision\bin\Debug\net8.0\DocumentFormat.OpenXml.Framework.dll
+D:\01. Github\ASP.NET-Core\RESTful Web API\CRUDRevision\bin\Debug\net8.0\ExcelNumberFormat.dll
+D:\01. Github\ASP.NET-Core\RESTful Web API\CRUDRevision\bin\Debug\net8.0\RBush.dll
+D:\01. Github\ASP.NET-Core\RESTful Web API\CRUDRevision\bin\Debug\net8.0\SixLabors.Fonts.dll
+D:\01. Github\ASP.NET-Core\RESTful Web API\CRUDRevision\bin\Debug\net8.0\System.IO.Packaging.dll
