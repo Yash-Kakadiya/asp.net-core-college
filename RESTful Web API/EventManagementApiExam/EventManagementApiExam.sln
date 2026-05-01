@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36930.0 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventManagementApiExam", "EventManagementApiExam.csproj", "{1823BCC3-8DA4-466F-B9F6-E118C9970A07}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1823BCC3-8DA4-466F-B9F6-E118C9970A07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1823BCC3-8DA4-466F-B9F6-E118C9970A07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1823BCC3-8DA4-466F-B9F6-E118C9970A07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1823BCC3-8DA4-466F-B9F6-E118C9970A07}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7E6C15B9-D187-4F09-B09F-AF6B7231F62D}
+	EndGlobalSection
+EndGlobal

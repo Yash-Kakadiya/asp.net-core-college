@@ -1,0 +1,254 @@
+﻿@model IEnumerable<AjaxDemo.Models.StudentModel>
+
+@{
+    ViewData["Title"] = "Student Page";
+}
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // EDIT - Load student details into the form
+            $(document).on("click", ".btn-edit-student", function() {
+                var formData = new FormData();
+                var studentid = $(this).attr("data-studentid");
+                var url = '@Url.Action("GetDetailsById", "Student")' + '/' + studentid;
+                $.ajax({
+                    type: 'GET',
+                    url: url,
+                    contentType: false,
+                    processData: false,
+                    cache: false,
+                    data: formData,
+                    success: function(response) {
+                        if (response.responseCode == 0) {
+                            var student = JSON.parse(response.responseMessage);
+                            $("#email").val(student.Email);
+                            $("#name").val(student.Name);
+                            $("#hdn-student-id").val(student.Id);
+                            // Scroll to the form so the user can see the loaded data
+                            $("html, body").animate({ scrollTop: 0 }, "fast");
+                        }
+                        else {
+                            alert(response.responseMessage);
+                        }
+                    },
+                    error: errorCallback
+                });
+            });
+            //SAVE
+            $("#btn-insert-student").on("click", function() {
+                var formData = new FormData();
+                formData.append("name", $("#name").val());
+                formData.append("email", $("#email").val());
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("InsertStudent", "Student")',
+                    contentType: false,
+                    processData: false,
+                    cache: false,
+                    data: formData,
+                    success: successCallback,
+                    error: errorCallback
+                });
+            });
+            // UPDATE
+            $("#btn-update-student").on("click", function() {
+                var formData = new FormData();
+                formData.append("id", $("#hdn-student-id").val());
+                formData.append("name", $("#name").val());
+                formData.append("email", $("#email").val());
+                $.ajax({
+                    type: 'PUT',
+                    url: '@Url.Action("UpdateStudent", "Student")',
+                    contentType: false,
+                    processData: false,
+                    cache: false,
+                    data: formData,
+                    success: successCallback,
+                    error: errorCallback
+                });
+            });
+            // DELETE - From table row button
+            $(document).on("click", ".btn-delete-student", function() {
+                var studentid = $(this).attr("data-studentid");
+
+                if (!confirm("Are you sure you want to delete this student?")) {
+                    return;
+                }
+
+                var formData = new FormData();
+                formData.append("id", studentid);
+                $.ajax({
+                    type: 'DELETE',
+                    url: '@Url.Action("DeleteStudent", "Student")',
+                    contentType: false,
+                    processData: false,
+                    cache: false,
+                    data: formData,
+                    success: function(response) {
+                        if (response.responseCode == 0) {
+                            alert("Student deleted successfully.");
+                            location.reload();
+                        }
+                        else {
+                            alert(response.responseMessage);
+                        }
+                    },
+                    error: errorCallback
+                });
+            });
+            // BULK INSERT
+            $("#btn-bulk-insert").on("click", function() {
+                var fileInput = $("#bulk-file")[0];
+
+                // Check if a file was selected
+                if (fileInput.files.length === 0) {
+                    alert("Please select a CSV or Excel file first.");
+                    return;
+                }
+
+                var formData = new FormData();
+                formData.append("file", fileInput.files[0]);
+
+                $.ajax({
+                    type: 'POST',
+                    url: '@Url.Action("BulkInsertStudents", "Student")',
+                    contentType: false,
+                    processData: false,
+                    cache: false,
+                    data: formData,
+                    success: function(response) {
+                        alert(response.responseMessage);
+                        if (response.responseCode == 0) {
+                            // Reload the page to show new students
+                            location.reload();
+                        }
+                    },
+                    error: errorCallback
+                });
+            });
+            function resetForm() {
+                $("#hdn-student-id").val("");
+                $("#name").val("");
+                $("#email").val("");
+            }
+            function errorCallback() {
+                alert("Something went wrong please contact admin.");
+            }
+            function successCallback(response) {
+                if (response.responseCode == 0) {
+                    resetForm();
+                    alert(response.responseMessage, function() {
+
+                        //PERFORM REMAINING LOGIC
+
+
+                    });
+
+                }
+                else {
+                    alert(response.ResponseMessage);
+                }
+            };
+        });
+    </script>
+}
+<div class="text-center">
+    <h1 class="display-4">Welcome To ASP.NET CORE AJAX Demo</h1>
+    <hr />
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <form>
+            <input type="hidden" id="hdn-student-id" />
+            <div class="row g-3">
+                <div class="col-sm-6">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" placeholder="Enter your email">
+                    <div class="invalid-feedback">
+                        Please enter a valid email address for shipping updates.
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <label for="lastName" class="form-label">Name</label>
+                    <input type="text" class="form-control" id="name" placeholder="Enter Your Name" value="" required="">
+                    <div class="invalid-feedback">
+                        Name is required.
+                    </div>
+                </div>
+
+            </div>
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <td>  <a href="javascript:void(0)" class="btn btn-primary" id="btn-insert-student">Save Student</a></td>
+                        <td>
+                            <a href="javascript:void(0)" class="btn btn-info" id="btn-update-student">Update Student</a>
+                        </td>
+                    </tr>
+                </tbody>
+
+            </table>
+        </form>
+
+    </div>
+    <br />
+</div>
+
+<!-- ========== BULK UPLOAD SECTION ========== -->
+<div class="row mt-4 mb-4">
+    <div class="col-sm-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Bulk Insert Students (CSV / Excel)</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">
+                    Upload a <strong>.csv</strong> or <strong>.xlsx</strong> file with <code>Name</code> and <code>Email</code> columns.
+                </p>
+                <div class="row g-3 align-items-end">
+                    <div class="col-sm-6">
+                        <label for="bulk-file" class="form-label">Choose File</label>
+                        <input type="file" class="form-control" id="bulk-file" accept=".csv,.xlsx" />
+                    </div>
+                    <div class="col-sm-3">
+                        <a href="javascript:void(0)" class="btn btn-warning" id="btn-bulk-insert">Upload &amp; Insert</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ========== END BULK UPLOAD SECTION ========== -->
+
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <td>#</td>
+                    <td>Name</td>
+                    <td>Email</td>
+                    <td>Action</td>
+                </tr>
+            </thead>
+            <tbody id="student-list">
+                @{
+
+                    foreach (var student in Model)
+                    {
+                        <tr>
+                            <td>@student.Id</td>
+                            <td>@student.Name</td>
+                            <td>@student.Email</td>
+                            <td>
+                                <a href="javascript:void(0)" data-studentid="@student.Id" class="btn btn-success btn-edit-student">Edit</a>
+                                <a href="javascript:void(0)" data-studentid="@student.Id" class="btn btn-danger btn-delete-student">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

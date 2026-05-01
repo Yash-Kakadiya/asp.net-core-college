@@ -1,0 +1,218 @@
+﻿@{
+    ViewData["Title"] = "User";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="container py-5" id="main-content">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-white border-bottom border-light py-4 px-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title mb-1 fw-bold text-dark">User Management</h5>
+                        <p class="text-muted small mb-0">Manage and oversee your platform users</p>
+                    </div>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill">Total: 1</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" id="user-table">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4 py-3 border-0 text-uppercase fs-xs fw-semibold text-muted tracking-wider" style="font-size: 0.75rem;">User Details</th>
+                                    <th class="py-3 border-0 text-uppercase fs-xs fw-semibold text-muted tracking-wider" style="font-size: 0.75rem;">Status</th>
+                                    <th class="text-end pe-4 py-3 border-0 text-uppercase fs-xs fw-semibold text-muted tracking-wider" style="font-size: 0.75rem;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="border-top-0">
+                                <tr>
+                                    <td class="ps-4 py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="position-relative">
+                                                <img src="https://ui-avatars.com/api/?name=John+Doe&background=random" class="rounded-circle border border-2 border-white shadow-sm me-3" width="45" height="45">
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold text-dark mb-0">John Doe</div>
+                                                <div class="text-muted small">john@example.com</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3 py-2">
+                                            <i class="bi bi-dot me-1"></i>Active
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-4 py-3">
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline-primary btn-sm rounded-2 me-2" title="Edit"><i class="bi bi-pencil"></i></button>
+                                            <button class="btn btn-outline-danger btn-sm rounded-2" title="Delete"><i class="bi bi-trash"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-primary py-4 px-4 border-0">
+                    <h5 class="card-title mb-1 fw-bold text-white">Add New User</h5>
+                    <p class="text-white-50 small mb-0">Enter details to create a new profile</p>
+                </div>
+                <div class="card-body p-4">
+                    <form id="add-user-form">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control border-light-subtle bg-light-subtle" id="name" placeholder="Name" required>
+                            <label for="name" class="text-muted small">Full Name</label>
+                        </div>
+                        <div class="form-floating mb-4">
+                            <input type="email" class="form-control border-light-subtle bg-light-subtle" id="email" placeholder="name@example.com" required>
+                            <label for="email" class="text-muted small">Email Address</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-3 shadow-sm transition-all">
+                            <i class="bi bi-person-plus-fill me-2"></i>Create User
+                        </button>
+                    </form>
+                </div>
+                <div class="card-footer bg-white border-0 py-3 text-center">
+                    <small class="text-muted">All fields are required</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+    function loadUsers() {
+        $.ajax({
+            type: 'GET',
+            url: '/User/GetUsers',
+            dataType: 'json',
+            success: function (users) {
+                let tbody = $('#user-table tbody');
+                tbody.empty();
+                $.each(users, function (index, user) {
+                    let row = `<tr>
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        <td><button class="edit-user" data-id="${user.id}">Edit</button></td>
+                        <td><button class="delete-user" data-id="${user.id}">Delete</button></td>
+                    </tr>`;
+                    tbody.append(row);
+                });
+            },
+            error: function (err) {
+                alert('Error loading users: ' + err);
+            }
+        });
+    }
+    $(function () {
+        loadUsers();
+        $('#add-user-form').submit(function (e) {
+            e.preventDefault();
+            let name = $('#name').val();
+            let email = $('#email').val();
+            console.log(name, email);
+            $.ajax({
+                type: 'POST',
+                url: '/User/AddUser',
+                contentType: 'application/json',
+                data: JSON.stringify({ name: name, email: email }),
+                success: function () {
+                    alert('User added successfully');
+                    loadUsers();
+                    $('#name').val('');
+                    $('#email').val('');
+                },
+                error: function (err) {
+                    alert('Error adding user: ' + err);
+                }
+            });
+        });
+
+        // Edit user, fill form field
+        $(document).on('click', '.edit-user', function () {
+            let userId = $(this).data('id');
+            $.ajax({
+                type: 'GET',
+                url: '/User/GetUserById',
+                data: { id: userId },
+                success: function (user) {
+                    $('#name').val(user.name);
+                    $('#email').val(user.email);
+                    $('#add-user-form').off('submit').submit(function (e) {
+                        e.preventDefault();
+                        let updatedName = $('#name').val();
+                        let updatedEmail = $('#email').val();
+                        $.ajax({
+                            type: 'PUT',
+                            url: '/User/UpdateUser',
+                            contentType: 'application/json',
+                            data: JSON.stringify({ id: userId, name: updatedName, email: updatedEmail }),
+                            success: function () {
+                                alert('User updated successfully');
+                                loadUsers();
+                                $('#name').val('');
+                                $('#email').val('');
+                                // Rebind the add user form
+                                $('#add-user-form').off('submit').submit(function (e) {
+                                    e.preventDefault();
+                                    let name = $('#name').val();
+                                    let email = $('#email').val();
+                                    $.ajax({
+                                        type: 'POST',
+                                        url: '/User/AddUser',
+                                        contentType: 'application/json',
+                                        data: JSON.stringify({ name: name, email: email }),
+                                        success: function () {
+                                            alert('User added successfully');
+                                            loadUsers();
+                                            $('#name').val('');
+                                            $('#email').val('');
+                                        },
+                                        error: function (err) {
+                                            alert('Error adding user: ' + err);
+                                        }
+                                    });
+                                });
+                            },
+                            error: function (err) {
+                                alert('Error updating user: ' + err);
+                            }
+                        });
+                    });
+                },
+                error: function (err) {
+                    alert('Error fetching user details: ' + err);
+                }
+            });
+        });
+
+
+        $(document).on('click', '.delete-user', function () {
+            let userId = $(this).data('id');
+            $.ajax({
+                type: 'DELETE',
+                url: '/User/DeleteUser',
+                data: { id: userId },
+                success: function () {
+                    alert('User deleted successfully');
+
+                    loadUsers();
+                },
+                error: function (err) {
+                    alert('Error deleting user: ' + err);
+                }
+            });
+        });
+    });
+</script>

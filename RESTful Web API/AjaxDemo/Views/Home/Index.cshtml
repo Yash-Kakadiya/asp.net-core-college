@@ -1,0 +1,113 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+<form>
+
+    <div class="d-flex justify-content-center align-content-center gap-3">
+
+    <div class="mb-3">
+        <label for="firstValue" class="form-label">Number 1</label>
+        <input type="text" class="form-control" id="firstValue" aria-describedby="firstValue">
+    </div>
+    <div class="mb-3">
+        <label for="secondValue" class="form-label">Number 2</label>
+        <input type="text" class="form-control" id="secondValue">
+    </div>
+    </div>
+    <div class="d-flex justify-content-center gap-5 align-content-center">
+
+    <button type="submit" id="addButton" class="btn btn-outline-primary">+</button>
+    <button type="submit" id="multiplyButton" class="btn btn-outline-primary">X</button>
+    <button type="submit" id="subtractButton" class="btn btn-outline-primary">-</button>
+    </div>
+    <div id="result">
+        <h1>Result: <span id="resultValue"></span></h1>
+    </div>
+</form>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script type="text/javascript">
+
+    function fnAdd(){
+        let x=parseInt($('#firstValue').val());
+        let y=parseInt($('#secondValue').val());
+
+        $.ajax(
+            {
+                type: 'Post',
+                url:'Home/GetSum',
+                data:{a:x, b:y},
+                dataType: 'text',
+                success:function(result){
+                    $('#resultValue').text(result);
+                },
+                error:function(err){
+                    alert('Error occured: ' + err);
+                }
+            }
+        )
+    }
+
+    $('#addButton').click(function(e){
+        e.preventDefault();
+        fnAdd();
+    });
+
+    function fnMul(){
+        let x=parseInt($('#firstValue').val());
+        let y=parseInt($('#secondValue').val());
+
+        $.ajax(
+            {
+                type: 'Post',
+                url:'Home/GetProduct',
+                data:{a:x, b:y},
+                dataType: 'text',
+                success:function(result){
+                    $('#resultValue').text(result);
+                },
+                error:function(err){
+                    alert('Error occured: ' + err);
+                }
+            }
+        )
+    }
+
+    $('#multiplyButton').click(function(e){
+        e.preventDefault();
+        fnMul();
+    });
+
+    function fnSub(){
+        let x=parseInt($('#firstValue').val());
+        let y=parseInt($('#secondValue').val());
+
+        $.ajax(
+            {
+                type: 'Post',
+                url:'Home/GetSubstraction',
+                data:{a:x, b:y},
+                dataType: 'text',
+                success:function(result){
+                    $('#resultValue').text(result);
+                },
+                error:function(err){
+                    alert('Error occured: ' + err);
+                }
+            }
+        )
+    }
+
+    $('#subtractButton').click(function(e){
+        e.preventDefault();
+        fnSub();
+    });
+
+
+
+</script>
